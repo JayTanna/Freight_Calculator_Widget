@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Widget</title>
+	<style type="text/css">
+	#test 
+    {
+        transition : all 1s ease;
+    }
+    .first
+    {
+        width: 250px;
+        height: 30px;
+        position: fixed;
+        bottom: 0px;
+        right: 25px;
+    }
+    #prop
+    {
+    	cursor: pointer;
+        width: 250px;
+        height: 30px;
+        position: relative;
+        bottom: 0px;
+        right: 0px;
+        background-color: #abc322;
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        font-size: 16px;
+        border-radius: 4px;
+    }
+    .second
+    {
+        width: 250px;
+        height: 400px;
+        position: fixed;
+        bottom: 0px;
+        right: 25px;
+        box-shadow: 3px 4px 40px grey;
+
+    }
+    #div2_button
+	{
+		background-color: #abc322;
+		color: white;
+		font-weight: 700;	
+		font-size:16px;
+		border: 1px solid transparent;
+		border-radius:4px; 
+	}
+	span 
+	{
+		display:none;
+	}
+	#form
+	{
+		margin: 0 auto;
+		width: 150px;
+	}
+	#prop
+	{
+		margin: 0 auto;
+		width : 250px;
+	}
+	label,table,legend, 
+	{
+		font-size: 14px;
+		font-weight: 600;
+		font-color :#444;
+	}
+	.textbox 
+	{ 
+    	height: 25px; 
+    	width: 120px; 
+    	background-color: transparent;  
+    	border-style: solid;  
+    	border-width: 0px 0px 1px 0px;  
+    	border-color: black; 
+    	outline:0; 
+  	}
+	</style>
+
+</head>
+
+<body>
+	<div id="test" class="first">
+        <div id = "prop">
+        <center>
+            Freight Calculator
+        </center>    
+        </div>
+        <form id="form" onsubmit="return false;">
+			<label>Where you want delivery:</label>
+			<select id="dropdown_list1" onchange="getCity()">
+				<option disabled selected value> -- select a city -- </option>
+				<optgroup label="Gujarat">
+					<option value="Ahmedabad">Ahmedabad</option>
+					<option value="Surat">Surat</option>
+					<option value="Vadodara">Vadodara</option>
+					<option value="Rajkot">Rajkot</option>
+					<option value="Gandhinagar">Gandhinagar</option>
+					<option value="Morbi">Morbi</option>
+
+				</optgroup>
+				<optgroup label="Maharashtra">
+					<option value="Mumbai">Mumbai</option>
+					<option value="Nagpur">Nagpur</option>
+					<option value="Pune">Pune</option>
+					<option value="Akola">Akola</option>
+					<option value="Marathavad">Marathavad</option>
+				</optgroup>
+			</select>
+			<br><br>
+			<label>Delivery comes from:</label>
+			<select id="dropdown_list2" onchange="getCity();">
+				<option disabled selected value> -- select a city -- </option>
+				<optgroup label="Gujarat">
+					<option value="Morbi">Morbi</option>
+
+				</optgroup>
+				
+			</select>
+			<br><br>
+			<label>Shoping_Amount:</label>
+			<input type="text" placeholder="Enter the shoping amount" id="shoping_amount" onkeypress="doNothing(event)" class="textbox"></input>
+			<br><br>
+			<input type= "button" value="calculate" id="div2_button" onclick="initialize();" ></input>
+			<span><div id="map_canvas"></div></span>
+
+			<br><br>
+			
+
+			
+		</form>
+		<form>
+		<fieldset>
+		<legend>Billing Structure:</legend>
+		<table width="120px">
+				<tr>
+				<td>Freight:</td>
+				<td id="C_P_T"></td>
+				</tr>
+				<tr>
+				<td>Tax:</td>
+				<td id="Taxes"></td>
+				</tr>
+				<tr>
+				<td>Insurance:</td>
+				<td id="Insurence"></td>
+				</tr>
+				<tr>
+				<td>Total Cost::</td>
+				<td id="T_C"></td>
+				</tr>
+			
+			</table>
+			</fieldset>
+		</form>
+
+    </div>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript">
+    	var location1;
+		var location2;
+
+		var address1;
+		var address2;
+
+		var latlng;
+		var geocoder;
+		var map;
+		var costPerTon;
+
+		var distance;
+		var distance_num;
+		var d_state;
+		var s_state;
+
+		var VAT;
+		var Exise;
+		var cst;
+		var Entry_Tax;
+		var insurence;
+
+		var amount;
+		var ton=1;
+		var tax;
+
+		function submitHandler()
+		{
+			return false;
+		}
+
+		function doNothing(e)
+		{
+			if(e.keyCode===13)
+			{
+				return false;
+			}	
+		}
+
+		$('#prop').click(function(e) {
+			document.getElementById('form').reset();
+			document.getElementById('C_P_T').innerHTML=" ";
+			document.getElementById('Insurence').innerHTML = " ";
+			document.getElementById('Taxes').innerHTML = " ";
+			document.getElementById('T_C').innerHTML = " ";
+  			e.preventDefault();
+  			$('#test').toggleClass('second');
+		});
+
+		function getCity()
+		{
+			address1 = document.getElementById("dropdown_list1").value;
+			address2 = document.getElementById("dropdown_list2").value;
+		}
+
+		$('#dropdown_list1').change(function() {
+    		var selected = $(':selected', this);
+    		d_state = selected.parent().attr('label');
+    		//console.log(selected.parent().attr('label'));
+    	});		
+
+		$('#dropdown_list2').change(function() {
+    		var selected = $(':selected', this);
+    		s_state = selected.parent().attr('label');
+    		//console.log(selected.parent().attr('label'));
+    		
+		});
+
+		function initialize()
+		{
+			geocoder = new google.maps.Geocoder(); 
+	
+			//console.log(address1);
+			//console.log(address2);
+			
+			if (geocoder) 
+			{
+				geocoder.geocode( { 'address': address1}, function(results, status) 
+				{
+					if (status == google.maps.GeocoderStatus.OK) 
+					{
+						location1 = results[0].geometry.location;
+					} 
+					else 
+					{
+						alert("Geocode was not successful for the following reason: " + status);
+					}
+				});
+				geocoder.geocode( { 'address': address2}, function(results, status) 
+				{
+					if (status == google.maps.GeocoderStatus.OK) 
+					{
+						location2 = results[0].geometry.location;
+						showMap();
+					}
+					else 
+					{
+						alert("Geocode was not successful for the following reason: " + status);
+					}
+				});
+			}	
+		}
+		
+		function showMap()
+		{
+			latlng = new google.maps.LatLng((location1.lat()+location2.lat())/2,(location1.lng()+location2.lng())/2);
+	
+			var mapOptions = 
+			{
+				zoom: 1,
+				center: latlng,
+				mapTypeId: google.maps.MapTypeId.HYBRID
+			};
+	
+			map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+	
+			directionsService = new google.maps.DirectionsService();
+			directionsDisplay = new google.maps.DirectionsRenderer(
+			{
+				suppressMarkers: true,
+				suppressInfoWindows: true
+			});
+			directionsDisplay.setMap(map);
+			var request = {
+				origin:location1, 
+				destination:location2,
+				travelMode: google.maps.DirectionsTravelMode.DRIVING
+			};
+			directionsService.route(request, function(response, status) 
+			{
+				if (status == google.maps.DirectionsStatus.OK) 
+				{
+					directionsDisplay.setDirections(response);
+					distance = response.routes[0].legs[0].distance.value;
+					distance_num = distance/1000; 
+					//console.log(distance_num);
+
+					if(distance_num<100)
+					{
+						costPerTon = distance_num*5;
+						freight = costPerTon*ton;
+						//console.log(costPerTon);
+						document.getElementById('C_P_T').innerHTML=parseFloat(freight).toFixed(2);	
+						getTax();
+					}
+					else if(distance_num> 100  && distance_num< 170)
+					{
+						costPerTon = distance_num*4;
+						freight = costPerTon*ton;
+						//console.log(costPerTon);
+						document.getElementById('C_P_T').innerHTML=parseFloat(freight).toFixed(2);	
+						getTax();
+					}
+					else
+					{
+						costPerTon = distance_num*2.3;
+						freight = costPerTon*ton;
+						//console.log(costPerTon);
+						document.getElementById('C_P_T').innerHTML=parseFloat(freight).toFixed(2);			
+						getTax();
+					}
+				
+				}	
+			});
+		}
+		
+		
+
+		function getTax()
+		{
+			amount = document.getElementById('shoping_amount').value;
+			
+			if (d_state=="Maharashtra" || d_state=="Daman & Diu" || d_state=="Delhi" || d_state=="Goa") 
+			{
+				VAT = amount*(12.50/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(0/100)+VAT*(0/100)+Exise*(0/100)+cst*(0/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+			else if(d_state=="Andaman & Nicobar" || d_state=="Arunachal Pradesh"||d_state=="Andhra Pradesh"||d_state=="Assam"||d_state=="Bihar" ||d_state=="Jammu & Kashmir" || d_state=="Jharkhand" || d_state=="Karnataka" || d_state=="Kerala" || d_state=="Manipur" || d_state=="Meghalaya" || d_state=="Mizoram" || d_state=="Lakshadweep"||d_state=="Nagaland"||d_state=="Pondichery"||d_state=="Rajasthan"||d_state=="Sikkim" || d_state=="Tamil Nadu"||d_state=="Tripura"||d_state=="Telengana"||d_state=="Uttar Pradesh"||d_state=="Uttaranchal"||d_state=="West Bengal")
+			{
+				VAT = amount*(14.50/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(0/100)+VAT*(0/100)+Exise*(0/100)+cst*(0/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+
+			else if(d_state=="Chandigarh")
+			{
+				VAT = amount*(13.13/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(0/100)+VAT*(0/100)+Exise*(0/100)+cst*(0/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+			else if(d_state=="Chattisgarh")
+			{
+				VAT = amount*(5.0/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(1/100)+VAT*(1/100)+Exise*(1/100)+cst*(1/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+			else if(d_state=="Dadra & Nagar Haveli")
+			{
+				VAT = amount*(15.0/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(0/100)+VAT*(0/100)+Exise*(0/100)+cst*(0/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}	
+			else if(d_state=="Gujarat")
+			{
+				VAT = amount*(5.0/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(0/100)+VAT*(0/100)+Exise*(0/100)+cst*(0/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);	
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+			else if(d_state=="Haryana")
+			{
+				VAT = amount*(13.25/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(0/100)+VAT*(0/100)+Exise*(0/100)+cst*(0/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+			else if(d_state=="Himachal Pradesh")
+			{
+				VAT = amount*(13.50/100);
+				Exise = amount+VAT*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(0/100)+VAT*(0/100)+Exise*(0/100)+cst*(0/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+
+			else if(d_state=="Madhya Pradesh")
+			{
+				VAT = amount*(15.0/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(1/100)+VAT*(1/100)+Exise*(1/100)+cst*(1/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);	
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+
+			else if (d_state=="Orissa") 
+			{
+				VAT = amount*(14.50/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(2/100)+VAT*(2/100)+Exise*(2/100)+cst*(2/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);
+				document.getElementById('Taxes').innerHTML=tax;
+				getInsurance();
+			}
+
+			else if(d_state=="Punjab")
+			{
+				VAT = amount*(13.13/100);
+				Exise = amount*(12.50/100)+VAT*(12.50/100);
+				cst = amount*(2/100)+VAT*(2/100)+Exise*(2/100);
+				Entry_Tax = amount*(1/100)+VAT*(1/100)+Exise*(1/100)+cst*(1/100);
+				//console.log(VAT+" "+Exise+" "+cst+" "+Entry_Tax);
+				tax = parseFloat(VAT+Exise+cst+Entry_Tax).toFixed(2);	
+				document.getElementById('Taxes').innerHTML= tax;
+				getInsurance();
+			}
+		}
+		
+		function getInsurance()
+		{
+			var shopping = document.getElementById("shoping_amount").value;
+			//console.log(shopping);
+			insurence = ((shopping/1000)*0.40);
+			document.getElementById('Insurence').innerHTML = parseFloat(insurence).toFixed(2);
+			//console.log("0.40 per 1000Rs of shopping");
+			console.log(tax);
+			console.log(costPerTon);
+			var total = parseFloat(parseFloat(shopping)+parseFloat(freight)+parseFloat(tax)+parseFloat(insurence)).toFixed(2);
+
+			document.getElementById('T_C').innerHTML = total;
+		}	
+
+	</script>
+
+</body>
+</html>
