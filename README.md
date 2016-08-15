@@ -3,4 +3,4 @@ It's a very useful widget to use for transport industry to calculate the transpo
 
 The widget is developed using HTML,CSS,javascript(jquery), google map API.
 Any one can use this code snippet for making their web site attractive and get their work done easyily.
-Any suggestion are also welcome.
+Any suggestions are also welcome.
